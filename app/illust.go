@@ -38,7 +38,7 @@ func (t *Illust) Detailed(handles ...func(ctx *IContext)) *illust.Illust {
 	if t.illust != nil {
 		return t.illust
 	}
-	t.Group.Get(t.Group.engine.Url.Illust(t.id), "application/json", iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
+	t.Group.Get(t.Group.engine.Url.Illust(t.id), iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.illust)
 		}
@@ -50,7 +50,7 @@ func (t *Illust) Pages(handles ...func(ctx *IContext)) *illust.IllustPages {
 	if t.pages != nil {
 		return t.pages
 	}
-	t.Group.Get(t.Group.engine.Url.IllustPages(t.id), "application/json", iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
+	t.Group.Get(t.Group.engine.Url.IllustPages(t.id), iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.pages)
 		}
@@ -63,7 +63,7 @@ func (t *Illust) Recommend(limit uint, handles ...func(ctx *IContext)) *illust.I
 	if t.recommend != nil {
 		return t.recommend
 	}
-	t.Group.Get(t.Group.engine.Url.IllustRecommend(t.id, limit), "application/json", iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
+	t.Group.Get(t.Group.engine.Url.IllustRecommend(t.id, limit), iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.recommend)
 		}
@@ -75,7 +75,7 @@ func (t *Illust) RecommendIllusts(illustIds []string, handles ...func(ctx *ICont
 	if t.recommendIllusts != nil {
 		return t.recommendIllusts
 	}
-	t.Group.Get(t.Group.engine.Url.IllustRecommendIllusts(illustIds), "application/json", iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
+	t.Group.Get(t.Group.engine.Url.IllustRecommendIllusts(illustIds), iCtxToCtx(t, append([]func(ctx *IContext){func(ctx *IContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.recommendIllusts)
 		}

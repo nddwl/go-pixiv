@@ -23,7 +23,7 @@ type Engine struct {
 	pixiv   *url.URL
 	rw      sync.RWMutex
 	Group   *Group
-	Url     *Url //Url url相关
+	Url     *Url
 }
 
 func NewWithConfig(cookie, proxy, ua string) (e *Engine) {

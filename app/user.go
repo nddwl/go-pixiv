@@ -47,7 +47,7 @@ func (t *User) SimpleData(handles ...func(ctx *UContext)) *user.UserFull0 {
 		return t.full0
 	}
 	url := t.Group.engine.Url.User(t.uid, 0)
-	t.Group.Get(url, "application/json", uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
+	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.full0)
 		}
@@ -60,7 +60,7 @@ func (t *User) DetailedData(handles ...func(ctx *UContext)) *user.UserFull1 {
 		return t.full1
 	}
 	url := t.Group.engine.Url.User(t.uid, 1)
-	t.Group.Get(url, "application/json", uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
+	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.full1)
 		}
@@ -73,7 +73,7 @@ func (t *User) ProfileAll(handles ...func(ctx *UContext)) *user.UserProfileAll {
 		return t.profileAll
 	}
 	url := t.Group.engine.Url.UserProfileAll(t.uid)
-	t.Group.Get(url, "application/json", uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
+	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.profileAll)
 		}
@@ -86,7 +86,7 @@ func (t *User) Illusts(ids []string, handles ...func(ctx *UContext)) *user.UserI
 		return t.illusts
 	}
 	url := t.Group.engine.Url.UserIllusts(t.uid, ids)
-	t.Group.Get(url, "application/json", uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
+	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.illusts)
 		}
@@ -99,7 +99,7 @@ func (t *User) ProfileIllusts(ids []string, handles ...func(ctx *UContext)) *use
 		return t.profileIllusts
 	}
 	url := t.Group.engine.Url.UserProfileIllusts(t.uid, ids)
-	t.Group.Get(url, "application/json", uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
+	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.profileIllusts)
 		}
@@ -112,7 +112,7 @@ func (t *User) ProfileTop(handles ...func(ctx *UContext)) *user.UserProfileTop {
 		return t.profileTop
 	}
 	url := t.Group.engine.Url.UserProfileTop(t.uid)
-	t.Group.Get(url, "application/json", uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
+	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.profileTop)
 		}
@@ -125,7 +125,7 @@ func (t *User) WorksLatest(handles ...func(ctx *UContext)) *user.UserWorksLatest
 		return t.worksLatest
 	}
 	url := t.Group.engine.Url.UserWorksLatest(t.uid)
-	t.Group.Get(url, "application/json", uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
+	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.worksLatest)
 		}

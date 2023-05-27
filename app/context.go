@@ -10,7 +10,7 @@ import (
 type Context struct {
 	Err      error
 	Request  *http.Request
-	Response *http.Response //Response 如果没用关闭,会自动调用body.Close()
+	Response *http.Response //Response 如果没有关闭Body,会自动调用Body.Close()
 	engine   *Engine
 	handles  []HandleFunc
 	index    int8

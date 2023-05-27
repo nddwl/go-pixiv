@@ -31,7 +31,7 @@ func (t *Self) OwnData(handles ...func(ctx *SContext)) *self.Self {
 		return t.self
 	}
 	url := t.Group.engine.Url.Self()
-	t.Group.Get(url, "application/json", sCtxToCtx(t, append([]func(ctx *SContext){func(ctx *SContext) {
+	t.Group.Get(url, sCtxToCtx(t, append([]func(ctx *SContext){func(ctx *SContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.self)
 		}

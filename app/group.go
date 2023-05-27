@@ -30,7 +30,7 @@ func (t *Group) Do(req *http.Request, handles ...HandleFunc) {
 	t.engine.handle(ctx)
 }
 
-func (t *Group) Get(url string, contentType string, handles ...HandleFunc) {
+func (t *Group) Get(url string, handles ...HandleFunc) {
 	req, err := http.NewRequest("GET", url, nil)
 	ctx := &Context{
 		Request:  req,
@@ -41,7 +41,6 @@ func (t *Group) Get(url string, contentType string, handles ...HandleFunc) {
 		index:    -1,
 	}
 	if err == nil {
-		req.Header.Set("Content-Type", contentType)
 		resp, err1 := t.engine.client.Do(req)
 		ctx.Err = err1
 		ctx.Response = resp
