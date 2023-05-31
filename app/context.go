@@ -16,10 +16,12 @@ type Context struct {
 	index    int8
 }
 
+//Abort 中止
 func (t *Context) Abort() {
 	t.index = math.MaxInt8
 }
 
+//Next 向后执行
 func (t *Context) Next() {
 	t.index++
 	for t.index < int8(len(t.handles)) {
@@ -28,11 +30,13 @@ func (t *Context) Next() {
 	}
 }
 
+//Byte 读取Response.Body中的数据
 func (t *Context) Byte() (b []byte, err error) {
 	b, err = io.ReadAll(t.Response.Body)
 	return
 }
 
+//Json 解析Response.Body中的数据
 func (t *Context) Json(data interface{}) error {
 	b, err := io.ReadAll(t.Response.Body)
 	if err != nil {

@@ -22,8 +22,22 @@ type Engine struct {
 	lang    string
 	pixiv   *url.URL
 	rw      sync.RWMutex
+	Illusts *Illusts
 	Group   *Group
 	Url     *Url
+}
+
+func New() (e *Engine) {
+	pixiv, _ := url.Parse("https://www.pixiv.net/")
+	e = &Engine{
+		config: load(),
+		lang:   "zn_tw",
+		pixiv:  pixiv,
+		rw:     sync.RWMutex{},
+	}
+	e.init()
+	e.initGroup()
+	return
 }
 
 func NewWithConfig(cookie, proxy, ua string) (e *Engine) {
@@ -43,17 +57,35 @@ func NewWithConfig(cookie, proxy, ua string) (e *Engine) {
 	return
 }
 
-func New() (e *Engine) {
-	pixiv, _ := url.Parse("https://www.pixiv.net/")
-	e = &Engine{
-		config: load(),
-		lang:   "zn_tw",
-		pixiv:  pixiv,
-		rw:     sync.RWMutex{},
+func (t *Engine) init() {
+	transport := &http.Transport{
+		DialContext:           (&net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}).DialContext,
+		Proxy:                 http.ProxyURL(t.config.ProxyUrl),
+		TLSHandshakeTimeout:   5 * time.Second,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       120 * time.Second,
+		ResponseHeaderTimeout: 15 * time.Second,
+		ExpectContinueTimeout: 5 * time.Second,
+		ForceAttemptHTTP2:     true,
 	}
-	e.init()
-	e.initGroup()
-	return
+
+	jar, _ := cookiejar.New(nil)
+	jar.SetCookies(t.pixiv, t.config.Cookies())
+	t.client = &http.Client{
+		Transport:     transport,
+		CheckRedirect: nil,
+		Jar:           jar,
+		Timeout:       30 * time.Second,
+	}
+}
+
+func (t *Engine) initGroup() {
+	t.Group = &Group{t}
+	t.Url = &Url{t.Group}
+	t.Illusts = &Illusts{
+		wait:  time.Millisecond * 1000,
+		Group: t.Group,
+	}
 }
 
 func load() (c *config.Config) {
@@ -89,41 +121,6 @@ func load() (c *config.Config) {
 	return
 }
 
-func (t *Engine) init() {
-	transport := &http.Transport{
-		DialContext:           (&net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}).DialContext,
-		TLSHandshakeTimeout:   5 * time.Second,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       120 * time.Second,
-		ResponseHeaderTimeout: 15 * time.Second,
-		ExpectContinueTimeout: 5 * time.Second,
-		ForceAttemptHTTP2:     true,
-	}
-
-	transport.Proxy = func(r *http.Request) (*url.URL, error) {
-		r.Header.Set("User-Agent", t.config.UserAgent)
-		if r.URL.Host == "www.pixiv.net" {
-			r.Header.Set("Referer", "https://www.pixiv.net/")
-			return t.config.ProxyUrl, nil
-		}
-		return nil, nil
-	}
-
-	jar, _ := cookiejar.New(nil)
-	jar.SetCookies(t.pixiv, t.config.Cookies())
-	t.client = &http.Client{
-		Transport:     transport,
-		CheckRedirect: nil,
-		Jar:           jar,
-		Timeout:       30 * time.Second,
-	}
-}
-
-func (t *Engine) initGroup() {
-	t.Group = &Group{t}
-	t.Url = &Url{t.Group}
-}
-
 func (t *Engine) handle(ctx *Context) {
 	if ctx.handles == nil {
 		return
@@ -135,6 +132,7 @@ func (t *Engine) handle(ctx *Context) {
 	}
 }
 
+//Save 创建config.json保存cookie和proxy等数据
 func (t *Engine) Save() {
 	t.rw.Lock()
 	cookies := t.client.Jar.Cookies(t.pixiv)
@@ -152,6 +150,7 @@ func (t *Engine) SetLang(lang string) {
 	t.lang = lang
 }
 
+//Use 全局中间件
 func (t *Engine) Use(handles ...HandleFunc) {
 	t.handles = append(t.handles, handles...)
 }
@@ -162,7 +161,7 @@ func (t *Engine) User(uid string, handles ...func(ctx *UContext)) (user *User) {
 		Group: t.Group,
 	}
 	if handles != nil {
-		user.Group.Do(nil, uCtxToCtx(user, handles...)...)
+		user.Group.Do(nil, nil, uCtxToCtx(user, handles...)...)
 	}
 	return
 }
@@ -172,7 +171,7 @@ func (t *Engine) Self(handles ...func(ctx *SContext)) (self *Self) {
 		Group: t.Group,
 	}
 	if handles != nil {
-		self.Group.Do(nil, sCtxToCtx(self, handles...)...)
+		self.Group.Do(nil, nil, sCtxToCtx(self, handles...)...)
 	}
 	return
 }
@@ -183,7 +182,7 @@ func (t *Engine) Illust(id string, handles ...func(ctx *IContext)) (illust *Illu
 		Group: t.Group,
 	}
 	if handles != nil {
-		illust.Group.Do(nil, iCtxToCtx(illust, handles...)...)
+		illust.Group.Do(nil, nil, iCtxToCtx(illust, handles...)...)
 	}
 	return
 }

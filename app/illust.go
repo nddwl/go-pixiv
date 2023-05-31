@@ -12,6 +12,7 @@ type Illust struct {
 	Group            *Group
 }
 
+//Use 中间件
 func (t *Illust) Use(handles ...func(ctx *IContext)) {
 	t.handles = append(t.handles, handles...)
 }
@@ -34,6 +35,7 @@ func iCtxToCtx(illust *Illust, handles ...func(ctx *IContext)) []HandleFunc {
 	return handleFunks
 }
 
+//Detailed 作画详细信息
 func (t *Illust) Detailed(handles ...func(ctx *IContext)) *illust.Illust {
 	if t.illust != nil {
 		return t.illust
@@ -46,6 +48,7 @@ func (t *Illust) Detailed(handles ...func(ctx *IContext)) *illust.Illust {
 	return t.illust
 }
 
+//Pages 作画链接地址
 func (t *Illust) Pages(handles ...func(ctx *IContext)) *illust.IllustPages {
 	if t.pages != nil {
 		return t.pages
@@ -58,7 +61,7 @@ func (t *Illust) Pages(handles ...func(ctx *IContext)) *illust.IllustPages {
 	return t.pages
 }
 
-//Recommend limit限制返回数据中illusts切片最大长度
+//Recommend 作画相似推荐,limit限制返回数据中illusts切片的最大长度
 func (t *Illust) Recommend(limit uint, handles ...func(ctx *IContext)) *illust.IllustRecommend {
 	if t.recommend != nil {
 		return t.recommend

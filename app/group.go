@@ -13,18 +13,25 @@ type Group struct {
 	engine *Engine
 }
 
-func (t *Group) Do(req *http.Request, handles ...HandleFunc) {
+func (t *Group) Do(req *http.Request, err error, handles ...HandleFunc) {
 	ctx := &Context{
 		Request:  req,
 		Response: nil,
-		Err:      nil,
+		Err:      err,
 		engine:   t.engine,
 		handles:  handles,
 		index:    -1,
 	}
-	if req != nil {
-		resp, err := t.engine.client.Do(req)
-		ctx.Err = err
+	if req != nil && err == nil {
+		req.Header.Set("Host", req.URL.Host)
+		if req.Header.Get("User-Agent") == "" {
+			req.Header.Set("User-Agent", t.engine.config.UserAgent)
+		}
+		if req.Header.Get("Referer") == "" {
+			req.Header.Set("Referer", "https://www.pixiv.net/")
+		}
+		resp, err1 := t.engine.client.Do(req)
+		ctx.Err = err1
 		ctx.Response = resp
 	}
 	t.engine.handle(ctx)
@@ -32,61 +39,22 @@ func (t *Group) Do(req *http.Request, handles ...HandleFunc) {
 
 func (t *Group) Get(url string, handles ...HandleFunc) {
 	req, err := http.NewRequest("GET", url, nil)
-	ctx := &Context{
-		Request:  req,
-		Response: nil,
-		Err:      err,
-		engine:   t.engine,
-		handles:  handles,
-		index:    -1,
-	}
-	if err == nil {
-		resp, err1 := t.engine.client.Do(req)
-		ctx.Err = err1
-		ctx.Response = resp
-	}
-	t.engine.handle(ctx)
+	t.Do(req, err, handles...)
 }
 
 func (t *Group) Post(url string, contentType string, body io.Reader, handles ...HandleFunc) {
 	req, err := http.NewRequest("POST", url, body)
-	ctx := &Context{
-		Request:  req,
-		Response: nil,
-		Err:      err,
-		engine:   t.engine,
-		handles:  handles,
-		index:    -1,
-	}
 	if err == nil {
 		req.Header.Set("Content-Type", contentType)
-		resp, err1 := t.engine.client.Do(req)
-		ctx.Err = err1
-		ctx.Response = resp
 	}
-	t.engine.handle(ctx)
+	t.Do(req, err, handles...)
 }
 
 func (t *Group) PostJson(url string, data interface{}, handles ...HandleFunc) {
 	b, err := json.Marshal(&data)
-	ctx := &Context{
-		Request:  nil,
-		Response: nil,
-		Err:      err,
-		engine:   t.engine,
-		handles:  handles,
-		index:    -1,
-	}
+	var req *http.Request
 	if err == nil {
-		req, err1 := http.NewRequest("GET", url, bytes.NewReader(b))
-		ctx.Err = err1
-		ctx.Request = req
-		if err1 == nil {
-			req.Header.Set("Content-Type", "application/json")
-			resp, err2 := t.engine.client.Do(req)
-			ctx.Err = err2
-			ctx.Response = resp
-		}
+		req, err = http.NewRequest("GET", url, bytes.NewReader(b))
 	}
-	t.engine.handle(ctx)
+	t.Do(req, err)
 }
