@@ -1,4 +1,4 @@
-package app
+package pixiv
 
 import (
 	"encoding/json"
@@ -27,6 +27,9 @@ func (t *Context) Next() {
 	for t.index < int8(len(t.handles)) {
 		t.handles[t.index](t)
 		t.index++
+	}
+	if t.Response != nil && !t.Response.Close {
+		t.Response.Body.Close()
 	}
 }
 

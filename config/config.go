@@ -1,10 +1,8 @@
 package config
 
 import (
-	"encoding/json"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 )
 
@@ -24,21 +22,4 @@ func (t *Config) Cookies() (c []*http.Cookie) {
 		}
 	}
 	return
-}
-
-func (t *Config) Save() {
-	f, err := os.Open("./config.json")
-	if err != nil {
-		if os.IsNotExist(err) {
-			b, _ := json.MarshalIndent(t, "", "	")
-			f, _ = os.Create("./config.json")
-			f.Write(b)
-			f.Close()
-		}
-		panic(err)
-	} else {
-		b, _ := json.MarshalIndent(t, "", "	")
-		f.Write(b)
-		f.Close()
-	}
 }

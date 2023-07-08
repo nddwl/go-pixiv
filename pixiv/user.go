@@ -1,16 +1,16 @@
-package app
+package pixiv
 
 import "go-pixiv/model/user"
 
 type User struct {
 	uid            string
-	full0          *user.UserFull0
-	full1          *user.UserFull1
-	illusts        *user.UserIllusts
-	profileAll     *user.UserProfileAll
-	profileIllusts *user.UserProfileIllusts
-	profileTop     *user.UserProfileTop
-	worksLatest    *user.UserWorksLatest
+	simple         *user.Simple
+	detailed       *user.Detailed
+	illusts        *user.Illusts
+	profileAll     *user.ProfileAll
+	profileIllusts *user.ProfileIllusts
+	profileTop     *user.ProfileTop
+	worksLatest    *user.WorksLatest
 	handles        []func(ctx *UContext)
 	Group          *Group
 }
@@ -42,37 +42,37 @@ func (t *User) UID() string {
 	return t.uid
 }
 
-func (t *User) SimpleData(handles ...func(ctx *UContext)) *user.UserFull0 {
-	if t.full0 != nil {
-		return t.full0
+func (t *User) Simple(handles ...func(ctx *UContext)) *user.Simple {
+	if t.simple != nil {
+		return t.simple
 	}
-	url := t.Group.engine.Url.User(t.uid, 0)
+	url := t.Group.Url.User(t.uid, 0)
 	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
-			ctx.Err = ctx.Json(&t.full0)
+			ctx.Err = ctx.Json(&t.simple)
 		}
 	}}, handles...)...)...)
-	return t.full0
+	return t.simple
 }
 
-func (t *User) DetailedData(handles ...func(ctx *UContext)) *user.UserFull1 {
-	if t.full1 != nil {
-		return t.full1
+func (t *User) Detailed(handles ...func(ctx *UContext)) *user.Detailed {
+	if t.detailed != nil {
+		return t.detailed
 	}
-	url := t.Group.engine.Url.User(t.uid, 1)
+	url := t.Group.Url.User(t.uid, 1)
 	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
-			ctx.Err = ctx.Json(&t.full1)
+			ctx.Err = ctx.Json(&t.detailed)
 		}
 	}}, handles...)...)...)
-	return t.full1
+	return t.detailed
 }
 
-func (t *User) ProfileAll(handles ...func(ctx *UContext)) *user.UserProfileAll {
+func (t *User) ProfileAll(handles ...func(ctx *UContext)) *user.ProfileAll {
 	if t.profileAll != nil {
 		return t.profileAll
 	}
-	url := t.Group.engine.Url.UserProfileAll(t.uid)
+	url := t.Group.Url.UserProfileAll(t.uid)
 	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.profileAll)
@@ -81,11 +81,11 @@ func (t *User) ProfileAll(handles ...func(ctx *UContext)) *user.UserProfileAll {
 	return t.profileAll
 }
 
-func (t *User) Illusts(ids []string, handles ...func(ctx *UContext)) *user.UserIllusts {
+func (t *User) Illusts(ids []string, handles ...func(ctx *UContext)) *user.Illusts {
 	if t.illusts != nil {
 		return t.illusts
 	}
-	url := t.Group.engine.Url.UserIllusts(t.uid, ids)
+	url := t.Group.Url.UserIllusts(t.uid, ids)
 	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.illusts)
@@ -94,11 +94,11 @@ func (t *User) Illusts(ids []string, handles ...func(ctx *UContext)) *user.UserI
 	return t.illusts
 }
 
-func (t *User) ProfileIllusts(ids []string, handles ...func(ctx *UContext)) *user.UserProfileIllusts {
+func (t *User) ProfileIllusts(ids []string, handles ...func(ctx *UContext)) *user.ProfileIllusts {
 	if t.profileIllusts != nil {
 		return t.profileIllusts
 	}
-	url := t.Group.engine.Url.UserProfileIllusts(t.uid, ids)
+	url := t.Group.Url.UserProfileIllusts(t.uid, ids)
 	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.profileIllusts)
@@ -107,11 +107,11 @@ func (t *User) ProfileIllusts(ids []string, handles ...func(ctx *UContext)) *use
 	return t.profileIllusts
 }
 
-func (t *User) ProfileTop(handles ...func(ctx *UContext)) *user.UserProfileTop {
+func (t *User) ProfileTop(handles ...func(ctx *UContext)) *user.ProfileTop {
 	if t.profileTop != nil {
 		return t.profileTop
 	}
-	url := t.Group.engine.Url.UserProfileTop(t.uid)
+	url := t.Group.Url.UserProfileTop(t.uid)
 	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.profileTop)
@@ -120,11 +120,11 @@ func (t *User) ProfileTop(handles ...func(ctx *UContext)) *user.UserProfileTop {
 	return t.profileTop
 }
 
-func (t *User) WorksLatest(handles ...func(ctx *UContext)) *user.UserWorksLatest {
+func (t *User) WorksLatest(handles ...func(ctx *UContext)) *user.WorksLatest {
 	if t.worksLatest != nil {
 		return t.worksLatest
 	}
-	url := t.Group.engine.Url.UserWorksLatest(t.uid)
+	url := t.Group.Url.UserWorksLatest(t.uid)
 	t.Group.Get(url, uCtxToCtx(t, append([]func(ctx *UContext){func(ctx *UContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.worksLatest)

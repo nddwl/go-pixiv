@@ -1,4 +1,4 @@
-package app
+package pixiv
 
 import (
 	"encoding/json"
@@ -17,21 +17,17 @@ import (
 
 type Engine struct {
 	client  *http.Client
-	config  *config.Config
-	handles []HandleFunc
-	lang    string
+	Config  *config.Config
 	pixiv   *url.URL
 	rw      sync.RWMutex
 	Illusts *Illusts
 	Group   *Group
-	Url     *Url
 }
 
 func New() (e *Engine) {
 	pixiv, _ := url.Parse("https://www.pixiv.net/")
 	e = &Engine{
-		config: load(),
-		lang:   "zn_tw",
+		Config: load(),
 		pixiv:  pixiv,
 		rw:     sync.RWMutex{},
 	}
@@ -43,12 +39,11 @@ func New() (e *Engine) {
 func NewWithConfig(cookie, proxy, ua string) (e *Engine) {
 	pixiv, _ := url.Parse("https://www.pixiv.net/")
 	e = &Engine{
-		config: &config.Config{
+		Config: &config.Config{
 			Cookie:    cookie,
 			Proxy:     proxy,
 			UserAgent: ua,
 		},
-		lang:  "zn_tw",
 		pixiv: pixiv,
 		rw:    sync.RWMutex{},
 	}
@@ -60,7 +55,7 @@ func NewWithConfig(cookie, proxy, ua string) (e *Engine) {
 func (t *Engine) init() {
 	transport := &http.Transport{
 		DialContext:           (&net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}).DialContext,
-		Proxy:                 http.ProxyURL(t.config.ProxyUrl),
+		Proxy:                 http.ProxyURL(t.Config.ProxyUrl),
 		TLSHandshakeTimeout:   5 * time.Second,
 		MaxIdleConns:          100,
 		IdleConnTimeout:       120 * time.Second,
@@ -70,7 +65,7 @@ func (t *Engine) init() {
 	}
 
 	jar, _ := cookiejar.New(nil)
-	jar.SetCookies(t.pixiv, t.config.Cookies())
+	jar.SetCookies(t.pixiv, t.Config.Cookies())
 	t.client = &http.Client{
 		Transport:     transport,
 		CheckRedirect: nil,
@@ -80,10 +75,9 @@ func (t *Engine) init() {
 }
 
 func (t *Engine) initGroup() {
-	t.Group = &Group{t}
-	t.Url = &Url{t.Group}
+	t.Group = &Group{engine: t}
 	t.Illusts = &Illusts{
-		wait:  time.Millisecond * 1000,
+		wait:  time.Millisecond * 500,
 		Group: t.Group,
 	}
 }
@@ -121,17 +115,6 @@ func load() (c *config.Config) {
 	return
 }
 
-func (t *Engine) handle(ctx *Context) {
-	if ctx.handles == nil {
-		return
-	}
-	ctx.handles = append(t.handles, ctx.handles...)
-	ctx.Next()
-	if ctx.Response != nil && !ctx.Response.Close {
-		ctx.Response.Body.Close()
-	}
-}
-
 //Save 创建config.json保存cookie和proxy等数据
 func (t *Engine) Save() {
 	t.rw.Lock()
@@ -140,19 +123,26 @@ func (t *Engine) Save() {
 	for _, v := range cookies {
 		str += v.String()
 	}
-	t.config.Cookie = str
-	t.config.Save()
+	t.Config.Cookie = str
+	f, err := os.Open("./config.json")
+	if err != nil {
+		if os.IsNotExist(err) {
+			b, _ := json.MarshalIndent(t.Config, "", "	")
+			f, _ = os.Create("./config.json")
+			f.Write(b)
+			f.Close()
+		}
+		panic(err)
+	} else {
+		b, _ := json.MarshalIndent(t.Config, "", "	")
+		f.Write(b)
+		f.Close()
+	}
 	t.rw.Unlock()
 }
 
-//SetLang 设置返回翻译,默认zn_tw
-func (t *Engine) SetLang(lang string) {
-	t.lang = lang
-}
-
-//Use 全局中间件
 func (t *Engine) Use(handles ...HandleFunc) {
-	t.handles = append(t.handles, handles...)
+	t.Group.handles = append(t.Group.handles, handles...)
 }
 
 func (t *Engine) User(uid string, handles ...func(ctx *UContext)) (user *User) {

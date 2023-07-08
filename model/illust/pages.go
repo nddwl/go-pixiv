@@ -1,7 +1,7 @@
 package illust
 
-//IllustPages https://www.pixiv.net/ajax/illust/<illust_id>/pages?lang=<lang>&version=<version>
-type IllustPages struct {
+//Pages https://www.pixiv.net/ajax/illust/<illust_id>/pages?lang=<lang>&version=<version>
+type Pages struct {
 	Error   bool   `json:"error"`
 	Message string `json:"message"`
 	Body    []struct {

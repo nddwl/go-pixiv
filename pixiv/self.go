@@ -1,4 +1,4 @@
-package app
+package pixiv
 
 import "go-pixiv/model/self"
 
@@ -26,11 +26,11 @@ func (t *Self) Use(handles ...func(ctx *SContext)) {
 	t.handles = append(t.handles, handles...)
 }
 
-func (t *Self) OwnData(handles ...func(ctx *SContext)) *self.Self {
+func (t *Self) Info(handles ...func(ctx *SContext)) *self.Self {
 	if t.self != nil {
 		return t.self
 	}
-	url := t.Group.engine.Url.Self()
+	url := t.Group.Url.Self()
 	t.Group.Get(url, sCtxToCtx(t, append([]func(ctx *SContext){func(ctx *SContext) {
 		if ctx.Err == nil {
 			ctx.Err = ctx.Json(&t.self)

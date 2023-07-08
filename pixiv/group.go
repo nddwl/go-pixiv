@@ -1,4 +1,4 @@
-package app
+package pixiv
 
 import (
 	"bytes"
@@ -10,10 +10,12 @@ import (
 type HandleFunc func(ctx *Context)
 
 type Group struct {
-	engine *Engine
+	engine  *Engine
+	handles []HandleFunc
+	Url     Url
 }
 
-func (t *Group) Do(req *http.Request, err error, handles ...HandleFunc) {
+func (t *Group) do(req *http.Request, err error, handles []HandleFunc) *Context {
 	ctx := &Context{
 		Request:  req,
 		Response: nil,
@@ -25,7 +27,7 @@ func (t *Group) Do(req *http.Request, err error, handles ...HandleFunc) {
 	if req != nil && err == nil {
 		req.Header.Set("Host", req.URL.Host)
 		if req.Header.Get("User-Agent") == "" {
-			req.Header.Set("User-Agent", t.engine.config.UserAgent)
+			req.Header.Set("User-Agent", t.engine.Config.UserAgent)
 		}
 		if req.Header.Get("Referer") == "" {
 			req.Header.Set("Referer", "https://www.pixiv.net/")
@@ -33,13 +35,29 @@ func (t *Group) Do(req *http.Request, err error, handles ...HandleFunc) {
 		resp, err1 := t.engine.client.Do(req)
 		ctx.Err = err1
 		ctx.Response = resp
+		for _, v := range t.handles {
+			v(ctx)
+		}
 	}
-	t.engine.handle(ctx)
+	return ctx
+}
+
+func (t *Group) Do(req *http.Request, err error, handles ...HandleFunc) {
+	t.do(req, err, handles).Next()
 }
 
 func (t *Group) Get(url string, handles ...HandleFunc) {
 	req, err := http.NewRequest("GET", url, nil)
-	t.Do(req, err, handles...)
+	t.do(req, err, handles).Next()
+}
+
+func (t *Group) GetJson(url string, obj interface{}, handles ...HandleFunc) {
+	req, err := http.NewRequest("GET", url, nil)
+	ctx := t.do(req, err, handles)
+	if ctx.Err == nil {
+		ctx.Err = ctx.Json(&obj)
+	}
+	ctx.Next()
 }
 
 func (t *Group) Post(url string, contentType string, body io.Reader, handles ...HandleFunc) {
@@ -47,7 +65,7 @@ func (t *Group) Post(url string, contentType string, body io.Reader, handles ...
 	if err == nil {
 		req.Header.Set("Content-Type", contentType)
 	}
-	t.Do(req, err, handles...)
+	t.do(req, err, handles).Next()
 }
 
 func (t *Group) PostJson(url string, data interface{}, handles ...HandleFunc) {
@@ -56,5 +74,5 @@ func (t *Group) PostJson(url string, data interface{}, handles ...HandleFunc) {
 	if err == nil {
 		req, err = http.NewRequest("GET", url, bytes.NewReader(b))
 	}
-	t.Do(req, err)
+	t.do(req, err, handles).Next()
 }
