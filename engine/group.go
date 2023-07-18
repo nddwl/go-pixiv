@@ -1,4 +1,4 @@
-package pixiv
+package engine
 
 import (
 	"bytes"
@@ -30,7 +30,7 @@ func (t *Group) do(req *http.Request, err error, handles []HandleFunc) *Context 
 			req.Header.Set("User-Agent", t.engine.Config.UserAgent)
 		}
 		if req.Header.Get("Referer") == "" {
-			req.Header.Set("Referer", "https://www.pixiv.net/")
+			req.Header.Set("Referer", "https://www.engine.net/")
 		}
 		resp, err1 := t.engine.client.Do(req)
 		ctx.Err = err1

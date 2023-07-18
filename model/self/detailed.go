@@ -1,7 +1,7 @@
 package self
 
-//Self https://www.pixiv.net/self?lang=<lang>&version=<version>
-type Self struct {
+//Detailed https://www.pixiv.net/self?lang=<lang>&version=<version>
+type Detailed struct {
 	UserData struct {
 		ID            string `json:"id"`
 		PixivID       string `json:"pixivId"`

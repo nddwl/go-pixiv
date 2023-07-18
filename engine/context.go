@@ -1,4 +1,4 @@
-package pixiv
+package engine
 
 import (
 	"encoding/json"
@@ -10,18 +10,16 @@ import (
 type Context struct {
 	Err      error
 	Request  *http.Request
-	Response *http.Response //Response 如果没有关闭Body,会自动调用Body.Close()
+	Response *http.Response
 	engine   *Engine
 	handles  []HandleFunc
 	index    int8
 }
 
-//Abort 中止
 func (t *Context) Abort() {
 	t.index = math.MaxInt8
 }
 
-//Next 向后执行
 func (t *Context) Next() {
 	t.index++
 	for t.index < int8(len(t.handles)) {
@@ -33,13 +31,11 @@ func (t *Context) Next() {
 	}
 }
 
-//Byte 读取Response.Body中的数据
 func (t *Context) Byte() (b []byte, err error) {
 	b, err = io.ReadAll(t.Response.Body)
 	return
 }
 
-//Json 解析Response.Body中的数据
 func (t *Context) Json(data interface{}) error {
 	b, err := io.ReadAll(t.Response.Body)
 	if err != nil {

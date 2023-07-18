@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-//Illust https://www.pixiv.net/ajax/illust/<illust_id>?lang=<lang>&version=<version>
-type Illust struct {
+//Detailed https://www.pixiv.net/ajax/illust/<illust_id>?lang=<lang>&version=<version>
+type Detailed struct {
 	Error   bool   `json:"error"`   // Error 表示是否有错误,如果没有错误则为false,有错误则为true
 	Message string `json:"message"` //Message 错误信息
 	Body    struct {

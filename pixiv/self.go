@@ -1,20 +1,23 @@
 package pixiv
 
-import "go-pixiv/model/self"
+import (
+	"go-pixiv/engine"
+	"go-pixiv/model/self"
+)
 
 type Self struct {
 	handles []func(ctx *SContext)
-	self    *self.Self
-	Group   *Group
+	self    *self.Detailed
+	Group   *engine.Group
 }
 
-func sCtxToCtx(self *Self, handles ...func(ctx *SContext)) []HandleFunc {
+func sCtxToCtx(self *Self, handles ...func(ctx *SContext)) []engine.HandleFunc {
 	handles = append(self.handles, handles...)
-	handleFunks := make([]HandleFunc, len(handles))
+	handleFunks := make([]engine.HandleFunc, len(handles))
 	for k, v := range handles {
 		sCtx := &SContext{Self: self}
 		handle := v
-		handleFunks[k] = func(ctx *Context) {
+		handleFunks[k] = func(ctx *engine.Context) {
 			sCtx.Context = ctx
 			handle(sCtx)
 		}
@@ -26,7 +29,7 @@ func (t *Self) Use(handles ...func(ctx *SContext)) {
 	t.handles = append(t.handles, handles...)
 }
 
-func (t *Self) Info(handles ...func(ctx *SContext)) *self.Self {
+func (t *Self) Info(handles ...func(ctx *SContext)) *self.Detailed {
 	if t.self != nil {
 		return t.self
 	}
@@ -41,5 +44,5 @@ func (t *Self) Info(handles ...func(ctx *SContext)) *self.Self {
 
 type SContext struct {
 	*Self
-	*Context
+	*engine.Context
 }
